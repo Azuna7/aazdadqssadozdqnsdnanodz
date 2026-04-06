@@ -75454,7 +75454,7 @@ pcall(function()
 	gameName = productInfo.Name or "Unknown"
 end)
 
-local MENU_TITLE = "Aira v1.3 | dev by @95k1 | " .. gameName
+local MENU_TITLE = "Aira v1.5 | dev by @95k1 | " .. gameName
 
 if LRM_UserNote then
 	MENU_TITLE = string.format("(v%s) Lycoris | %s", VERSION, gameName)
@@ -75490,7 +75490,6 @@ function Menu.init()
 
 	-- Initialize all tabs. Don't initialize them if we have the 'exploit_tester' role.
 	CombatTab.init(window)
-
 	GameTab.init(window)
 	VisualsTab.init(window)
 	AutomationTab.init(window)
@@ -78041,6 +78040,41 @@ function GameTab.initLocalCharacterSection(groupbox)
 		Rounding = 0,
 	})
 
+    local apbreakerToggle = groupbox:AddToggle("APBreaker", {
+        Text = "AP Breaker",
+        Tooltip = "Ap Break ur opponent with the power of Aira. ",
+        Default = false,
+        Callback = function(value)
+            local APBreaker = require("Game/APBreaker")
+            if value then
+                APBreaker:start()
+            else
+                APBreaker:stop()
+            end
+        end, 
+    })
+
+    apbreakerToggle:AddKeyPicker("APBreakerKeybind", { Default = "N/A", SyncToggleState = true, Text = "APBreaker" })
+
+    local apbreakerDepBox = groupbox:AddDependencyBox()
+
+    apbreakerDepBox:SetupDependencies({
+        { apbreakerToggle, true } 
+    })
+
+    apbreakerDepBox:AddSlider("APBreakerIntensity", {
+        Text = "AP Breaker Intensity",
+        Default = 79,
+        Min = 0,
+        Max = 425,
+        Suffix = "x",
+        Rounding = 0,
+        Callback = function(value)
+            local APBreaker = require("Game/APBreaker")
+            APBreaker.speed = value
+        end,
+    })
+
 	local noclipToggle = groupbox:AddToggle("NoClip", {
 		Text = "NoClip",
 		Tooltip = "Disable collision(s) for your character.",
@@ -78708,26 +78742,6 @@ function GameTab.initTweeningSection(groupbox)
 	})
 end
 
----AP Breaker section.
----@param groupbox table
-function GameTab.initAPBreakerSection(groupbox)
-	local apBreakerToggle = groupbox:AddToggle("APBreaker", {
-		Text = "AP Breaker",
-		Tooltip = "made with ❤️ <3 ",
-		Default = false,
-		Callback = function(value)
-			local APBreaker = require("Game/APBreaker")
-			if value then
-				APBreaker:start()
-			else
-				APBreaker:stop()
-			end
-		end,
-	})
-
-	apBreakerToggle:AddKeyPicker("APBreakerKeybind", { Default = "N/A", SyncToggleState = true, Text = "AP Breaker" })
-end
-
 ---Initialize tab.
 function GameTab.init(window)
 	-- Create tab.
@@ -78741,7 +78755,6 @@ function GameTab.init(window)
 	GameTab.initPlayerMonitoringSection(tab:AddDynamicGroupbox("Player Monitoring"))
 	GameTab.initInfoSpoofingSection(tab:AddDynamicGroupbox("Info Spoofing"))
 	GameTab.initTweeningSection(tab:AddDynamicGroupbox("Tweening Customization"))
-	GameTab.initAPBreakerSection(tab:AddDynamicGroupbox("AP Breaker"))
 end
 
 -- Return GameTab module.
@@ -78749,14 +78762,10 @@ return GameTab
 
 end)
 __bundle_register("Game/APBreaker", function(require, _LOADED, __bundle_register, __bundle_modules)
--- AP Breaker Module
--- Disables AP (Animation Points) system by continuously cycling idle animations
--- This prevents the game from registering ability usage cooldowns
 
 local Players = game:GetService("Players")
 
 local APBreaker = {}
-
 
 local ANIMS = {
     "rbxassetid://9149348937",
@@ -78767,17 +78776,23 @@ local ANIMS = {
     "rbxassetid://8378263543",
 }
 
-
 local PULSES_PER_SECOND = 999
-local SPEED = 50
-local WEIGHT = 0.05
+local SPEED = 79
+local WEIGHT = 0.01
 local FADE_TIME = 0
 local PRIORITY = Enum.AnimationPriority.Idle
-
 
 APBreaker.enabled = false
 APBreaker.currentStop = nil
 APBreaker.charConn = nil
+
+function APBreaker:setSpeed(value)
+    SPEED = value
+end
+
+function APBreaker:setWeight(value)
+    WEIGHT = value
+end
 
 local function newAnim(id)
     local a = Instance.new("Animation")
@@ -80683,6 +80698,6 @@ end
 
 -- Return Hooking module.
 return Hooking
-	
+    
 end)
 return __bundle_require("__root")
