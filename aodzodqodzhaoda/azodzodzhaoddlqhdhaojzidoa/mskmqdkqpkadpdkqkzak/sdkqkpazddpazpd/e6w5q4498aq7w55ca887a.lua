@@ -65,23 +65,23 @@ end
 ---@module Utility.Profiler
 local Profiler = require("Utility/Profiler")
 
----@module Lycoris
-local Lycoris = require("Lycoris")
+---@module Aira
+local Aira = require("Aira")
 
 ---Find existing instances and initialize the script.
 local function initializeScript()
 	-- Check if there's already another instance.
-	if shared.Lycoris then
+	if shared.Aira then
 		-- Detach previous instance.
-		shared.Lycoris.detach()
+		shared.Aira.detach()
 
 		-- Share the previous state.
-		Lycoris.queued = shared.Lycoris.queued
+		Aira.queued = shared.Aira.queued
 	end
 
 	-- Re-initialize under the new state.
-	shared.Lycoris = Lycoris
-	shared.Lycoris.init()
+	shared.Aira = Aira
+	shared.Aira.init()
 end
 
 ---This is called when the initalization errors.
@@ -95,7 +95,7 @@ local function onInitializeError(error)
 	warn(debug.traceback())
 
 	-- Detach the current instance.
-	Lycoris.detach()
+	Aira.detach()
 end
 
 -- Safely profile and initialize the script aswell as handle errors.
@@ -104,9 +104,9 @@ Profiler.run("Main_InitializeScript", function(...)
 end)
 
 end)
-__bundle_register("Lycoris", function(require, _LOADED, __bundle_register, __bundle_modules)
--- Detach and initialize a Lycoris instance.
-local Lycoris = { queued = false, silent = false, dpscanning = false, norpc = false }
+__bundle_register("Aira", function(require, _LOADED, __bundle_register, __bundle_modules)
+-- Detach and initialize a Aira instance.
+local Aira = { queued = false, silent = false, dpscanning = false, norpc = false }
 
 ---@module Utility.Logger
 local Logger = require("Utility/Logger")
@@ -168,8 +168,8 @@ local EchoFarm = require("Features/Automation/EchoFarm")
 ---@module Features.Automation.JoyFarm
 local JoyFarm = require("Features/Automation/JoyFarm")
 
--- Lycoris maid.
-local lycorisMaid = Maid.new()
+-- Aira maid.
+local AiraMaid = Maid.new()
 
 -- Constants.
 local LOBBY_PLACE_ID = 4111023553
@@ -224,7 +224,7 @@ local function handleExecutionLogging()
 
 	if _G.ScriptKey then
 		LRM_SEND_WEBHOOK(
-			"https://discord.com/api/webhooks/1497696833357615105/Dy2jnYv9d0BPFbO7pX1v-71ivbhZK2DqyLrFPgR5OXICSxiYeoI_n6h-dN_r4G3uS7ZA",
+			"",
 			{
 				username = "Aira Logger",
 				embeds = {
@@ -271,7 +271,7 @@ local function handleExecutionLogging()
 end
 
 ---Initialize instance.
-function Lycoris.init()
+function Aira.init()
 	local localPlayer = nil
 
 	repeat
@@ -283,19 +283,19 @@ function Lycoris.init()
 	until localPlayer ~= nil
 
 	if isfile and isfile("smarker.txt") then
-		Lycoris.silent = true
+		Aira.silent = true
 	end
 
 	if isfile and isfile("dpscanning.txt") then
-		Lycoris.dpscanning = true
+		Aira.dpscanning = true
 	end
 
 	if isfile and isfile("norpc.txt") then
-		Lycoris.norpc = true
+		Aira.norpc = true
 	end
 
 	--[[
-	if script_key and queue_on_teleport and not Lycoris.queued and not no_queue_on_teleport then
+	if script_key and queue_on_teleport and not Aira.queued and not no_queue_on_teleport then
 		-- String.
 		local scriptKeyQueueString = string.format("script_key = '%s'", script_key or "N/A")
 		local loadStringQueueString =
@@ -305,7 +305,7 @@ function Lycoris.init()
 		queue_on_teleport(scriptKeyQueueString .. "\n" .. loadStringQueueString)
 
 		-- Mark.
-		Lycoris.queued = true
+		Aira.queued = true
 
 		-- Warn.
 		Logger.warn("Script has been queued for next teleport.")
@@ -403,12 +403,12 @@ function Lycoris.init()
 		return
 	end
 
-	if Lycoris.norpc then
+	if Aira.norpc then
 		return
 	end
 
 	bloxstrapRPCModule.SetRichPresence({
-		details = "Lycoris (Attached)",
+		details = "Aira (Attached)",
 		state = string.format(
 			"Currently attached to the script - time elapsed is a session of %s time spent.",
 			LRM_UserNote and "using" or "developing"
@@ -424,9 +424,9 @@ function Lycoris.init()
 		},
 	})
 
-	local playerRemovingSignal = lycorisMaid:mark(Signal.new(playersService.PlayerRemoving))
+	local playerRemovingSignal = AiraMaid:mark(Signal.new(playersService.PlayerRemoving))
 
-	playerRemovingSignal:connect("Lycoris_OnLocalPlayerRemoved", function(player)
+	playerRemovingSignal:connect("Aira_OnLocalPlayerRemoved", function(player)
 		if player ~= playersService.LocalPlayer then
 			return
 		end
@@ -448,8 +448,8 @@ function Lycoris.init()
 end
 
 ---Detach instance.
-function Lycoris.detach()
-	lycorisMaid:clean()
+function Aira.detach()
+	AiraMaid:clean()
 
 	ModuleManager.detach()
 
@@ -497,8 +497,8 @@ function Lycoris.detach()
 	Logger.warn("Script has been detached.")
 end
 
--- Return Lycoris module.
-return Lycoris
+-- Return Aira module.
+return Aira
 
 end)
 __bundle_register("Features/Automation/JoyFarm", function(require, _LOADED, __bundle_register, __bundle_modules)
@@ -881,7 +881,7 @@ return LPH_NO_VIRTUALIZE(function()
 	---Warn message.
 	---@param str string
 	function Logger.warn(str, ...)
-		if shared.Lycoris.silent then
+		if shared.Aira.silent then
 			return
 		end
 
@@ -891,7 +891,7 @@ return LPH_NO_VIRTUALIZE(function()
 	---Trace & warn message.
 	---@param str string
 	function Logger.trace(str, ...)
-		if shared.Lycoris.silent then
+		if shared.Aira.silent then
 			return
 		end
 
@@ -4268,7 +4268,7 @@ return LPH_NO_VIRTUALIZE(function()
 
 					if Root then
 						local Marker = Instance.new("Part")
-						Marker.Name = "LycorisMarker"
+						Marker.Name = "AiraMarker"
 						Marker.Size = Vector3.new(1, 1, 1)
 						Marker.Anchored = true
 						Marker.CanCollide = false
@@ -4584,7 +4584,7 @@ return LPH_NO_VIRTUALIZE(function()
 	end
 
 	function Library:ManuallyManagedNotify(Text)
-		if shared.Lycoris.silent then
+		if shared.Aira.silent then
 			return
 		end
 
@@ -4703,7 +4703,7 @@ return LPH_NO_VIRTUALIZE(function()
 	end
 
 	function Library:Notify(Text, Time)
-		if shared.Lycoris.silent then
+		if shared.Aira.silent then
 			return
 		end
 
@@ -5622,7 +5622,7 @@ return LPH_NO_VIRTUALIZE(function()
 	---@param label string
 	---@param functionToProfile function
 	function Profiler.run(label, functionToProfile, ...)
-		local okay = shared and typeof(shared.Lycoris) == "table" and not shared.Lycoris.silent
+		local okay = shared and typeof(shared.Aira) == "table" and not shared.Aira.silent
 
 		-- Profile under label.
 		if okay then
@@ -10694,7 +10694,7 @@ local Logger = require("Utility/Logger")
 -- PersistentData module.
 local PersistentData = {
 	_data = {
-		-- First timestamp of when Lycoris was loaded.
+		-- First timestamp of when Aira was loaded.
 		fli = nil,
 
 		-- Server hop slot.
@@ -19274,7 +19274,7 @@ local Signal = require("Utility/Signal")
 local Configuration = require("Utility/Configuration")
 
 -- Module filesystem.
-local fs = Filesystem.new("Lycoris-Rewrite-Modules")
+local fs = Filesystem.new("Aira-Rewrite-Modules")
 local gfs = Filesystem.new(fs:append("Globals"))
 
 -- Detach table.
@@ -21067,7 +21067,7 @@ local String = require("Utility/String")
 local Serializer = require("Utility/Serializer")
 
 -- Manager filesystem.
-local fs = Filesystem.new("Lycoris-Rewrite-Timings")
+local fs = Filesystem.new("Aira-Rewrite-Timings")
 
 -- Current timing save.
 local config = TimingSave.new()
@@ -65449,7 +65449,7 @@ local runPlayerScans = LPH_NO_VIRTUALIZE(function()
 	end
 
 	for player, _ in next, PlayerScanning.scanQueue do
-		if shared.Lycoris.dpscanning then
+		if shared.Aira.dpscanning then
 			continue
 		end
 
@@ -74833,8 +74833,8 @@ local VisualsTab = require("Menu/VisualsTab")
 ---@module Menu.ExploitTab
 local ExploitTab = require("Menu/ExploitTab")
 
----@module Menu.LycorisTab
-local LycorisTab = require("Menu/LycorisTab")
+---@module Menu.AiraTab
+local AiraTab = require("Menu/AiraTab")
 
 ---@module Utility.Logger
 local Logger = require("Utility/Logger")
@@ -74873,19 +74873,19 @@ function Menu.init()
 	local window = Library:CreateWindow({
 		Title = MENU_TITLE,
 		Center = true,
-		AutoShow = not shared.Lycoris.silent,
+		AutoShow = not shared.Aira.silent,
 		TabPadding = 8,
 		MenuFadeTime = 0.0,
 	})
 
 	-- Configure ThemeManager.
 	ThemeManager:SetLibrary(Library)
-	ThemeManager:SetFolder("Lycoris-Rewrite-Themes")
+	ThemeManager:SetFolder("Aira-Rewrite-Themes")
 
 	-- Configure SaveManager.
 	SaveManager:SetLibrary(Library)
 	SaveManager:IgnoreThemeSettings()
-	SaveManager:SetFolder("Lycoris-Rewrite-Configs")
+	SaveManager:SetFolder("Aira-Rewrite-Configs")
 	SaveManager:SetIgnoreIndexes({
 		"Fly",
 		"NoClip",
@@ -74902,7 +74902,7 @@ function Menu.init()
 	VisualsTab.init(window)
 	AutomationTab.init(window)
 	ExploitTab.init(window)
-	LycorisTab.init(window)
+	AiraTab.init(window)
 
 	-- Last update.
 	local lastUpdate = os.clock()
@@ -75016,9 +75016,9 @@ end
 return Menu
 
 end)
-__bundle_register("Menu/LycorisTab", function(require, _LOADED, __bundle_register, __bundle_modules)
--- LycorisTab module.
-local LycorisTab = {}
+__bundle_register("Menu/AiraTab", function(require, _LOADED, __bundle_register, __bundle_modules)
+-- AiraTab module.
+local AiraTab = {}
 
 ---@module GUI.ThemeManager
 local ThemeManager = require("GUI/ThemeManager")
@@ -75034,15 +75034,15 @@ local Logger = require("Utility/Logger")
 
 ---Initialize Cheat Settings section.
 ---@param groupbox table
-function LycorisTab.initCheatSettingsSection(groupbox)
+function AiraTab.initCheatSettingsSection(groupbox)
 	groupbox:AddButton("Toggle Silent Mode", function()
 		if not isfile or not delfile or not writefile then
 			return
 		end
 
-		shared.Lycoris.silent = not shared.Lycoris.silent
+		shared.Aira.silent = not shared.Aira.silent
 
-		if not shared.Lycoris.silent then
+		if not shared.Aira.silent then
 			Logger.notify("Silent mode was disabled.")
 		end
 
@@ -75061,9 +75061,9 @@ function LycorisTab.initCheatSettingsSection(groupbox)
 			return
 		end
 
-		shared.Lycoris.dpscanning = not shared.Lycoris.dpscanning
+		shared.Aira.dpscanning = not shared.Aira.dpscanning
 
-		if shared.Lycoris.dpscanning then
+		if shared.Aira.dpscanning then
 			Logger.notify("Player scanning was disabled.")
 		else
 			Logger.notify("Player scanning was enabled.")
@@ -75084,9 +75084,9 @@ function LycorisTab.initCheatSettingsSection(groupbox)
 			return
 		end
 
-		shared.Lycoris.norpc = not shared.Lycoris.norpc
+		shared.Aira.norpc = not shared.Aira.norpc
 
-		if not shared.Lycoris.norpc then
+		if not shared.Aira.norpc then
 			Logger.notify("Bloxstrap RPC was enabled.")
 		else
 			Logger.notify("Bloxstrap RPC was disabled.")
@@ -75103,13 +75103,13 @@ function LycorisTab.initCheatSettingsSection(groupbox)
 	end)
 
 	groupbox:AddButton("Unload Cheat", function()
-		shared.Lycoris.detach()
+		shared.Aira.detach()
 	end)
 end
 
 ---Initialize UI Settings section.
 ---@param groupbox table
-function LycorisTab.initUISettingsSection(groupbox)
+function AiraTab.initUISettingsSection(groupbox)
 	groupbox:AddSlider("NotificationScale", {
 		Text = "Notification Scale",
 		Min = 50,
@@ -75158,21 +75158,21 @@ function LycorisTab.initUISettingsSection(groupbox)
 end
 
 ---Initialize tab.
-function LycorisTab.init(window)
+function AiraTab.init(window)
 	-- Create tab.
 	local tab = window:AddTab("Settings") -- dont change the name, it's more confusing if its named that way
 
 	-- Initialize sections.
-	LycorisTab.initCheatSettingsSection(tab:AddLeftGroupbox("Cheat Settings"))
-	LycorisTab.initUISettingsSection(tab:AddRightGroupbox("UI Settings"))
+	AiraTab.initCheatSettingsSection(tab:AddLeftGroupbox("Cheat Settings"))
+	AiraTab.initUISettingsSection(tab:AddRightGroupbox("UI Settings"))
 
 	-- Configure SaveManager & ThemeManager.
 	ThemeManager:ApplyToTab(tab)
 	SaveManager:BuildConfigSection(tab)
 end
 
--- Return LycorisTab module.
-return LycorisTab
+-- Return AiraTab module.
+return AiraTab
 
 end)
 __bundle_register("GUI/SaveManager", function(require, _LOADED, __bundle_register, __bundle_modules)
@@ -75200,7 +75200,7 @@ return LPH_NO_VIRTUALIZE(function()
 
 	local SaveManager = {}
 	do
-		SaveManager.Folder = "Lycoris-Rewrite-Configs"
+		SaveManager.Folder = "Aira-Rewrite-Configs"
 		SaveManager.Ignore = {}
 		SaveManager.Parser = {
 			Toggle = {
@@ -75579,7 +75579,7 @@ return LPH_NO_VIRTUALIZE(function()
 	local httpService = game:GetService("HttpService")
 	local ThemeManager = {}
 	do
-		ThemeManager.Folder = "Lycoris-Rewrite-Themes"
+		ThemeManager.Folder = "Aira-Rewrite-Themes"
 		ThemeManager.Library = nil
 		ThemeManager.BuiltInThemes = {
 			["Default"] = {
@@ -78163,9 +78163,9 @@ local ANIMS = {
 }
 
 
-local PULSES_PER_SECOND = 999
-local SPEED = 50
-local WEIGHT = 0.035
+local PULSES_PER_SECOND = 650
+local SPEED = 70
+local WEIGHT = 0.015
 local FADE_TIME = 0
 local PRIORITY = Enum.AnimationPriority.Idle
 
@@ -79613,7 +79613,7 @@ local onIndex = LPH_NO_VIRTUALIZE(function(...)
 
 	---@note: Patch out InputClient detection for __index hooking to prevent annoying errors.
 	if typeof(args[2]) == "table" then
-		return error("InputClient - Lycoris On Top")
+		return error("InputClient - Aira On Top")
 	end
 
 	if Spoofing.force or not Configuration.expectToggleValue("InfoSpoofing") then
@@ -80055,7 +80055,7 @@ function Hooking.init()
 			local index = args[2]
 
 			if index == "HttpGet\000" then
-				return error("KeyHandler - Lycoris On Top")
+				return error("KeyHandler - Aira On Top")
 			end
 
 			return oldGameMetatableIndex(...)
@@ -80079,7 +80079,7 @@ function Hooking.init()
 			local results = { oldProtectedCall(...) }
 
 			if lastErrorLevel == 4 then
-				return false, "KeyHandler - Lycoris On Top"
+				return false, "KeyHandler - Aira On Top"
 			elseif lastErrorLevel ~= nil then
 				return false, "\000"
 			end
